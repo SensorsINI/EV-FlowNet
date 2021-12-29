@@ -1,0 +1,1 @@
+Run convertTOEvflownetGT.py to generate a .npz file which is supported by Ev-Flownet.

@@ -1,0 +1,7 @@
+Ev-flownet provide a tool script called extract_rosbag_to_tf.py for this conversion.
+But it has requirement on the original rosbag file.
+The rosbag should have at least 4 topics:
+/davis/left/events
+/davis/right/events
+/davis/left/image_raw
+/davis/right/image_raw
