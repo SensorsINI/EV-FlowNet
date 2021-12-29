@@ -1,1 +1,2 @@
+Copy slider_hdr_far_evflownet.bag here.
 Run convertTOEvflownetGT.py to generate a .npz file which is supported by Ev-Flownet.
