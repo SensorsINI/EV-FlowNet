@@ -126,7 +126,7 @@ def test(sess,
             gt_flow = gt_flow[yoff:-yoff, xoff:-xoff, :]       
         
             # Calculate flow error.
-            AEE, percent_AEE, n_points = flow_error_dense(gt_flow, 
+            AEE, percent_AEE, n_points, flow_gt_masked = flow_error_dense(gt_flow,
                                                           pred_flow, 
                                                           event_count_image,
                                                           'outdoor' in args.test_sequence)
@@ -181,7 +181,7 @@ def test(sess,
                 if 'outdoor' in args.test_sequence:
                     errors[190:, :] = 0
                 
-                gt_flow_rgb = flow_viz_np(gt_flow[...,0], gt_flow[...,1])
+                gt_flow_rgb = flow_viz_np(flow_gt_masked[...,0], flow_gt_masked[...,1])
 
                 gt_flow_rgb = drawImageTitle(gt_flow_rgb, 'GT Flow')
                 errors= drawImageTitle(errors, 'Flow Error')

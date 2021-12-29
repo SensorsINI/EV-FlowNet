@@ -9,6 +9,7 @@ Calculates per pixel flow error between flow_pred and flow_gt.
 event_img is used to mask out any pixels without events (are 0).
 If is_car is True, only the top 190 rows of the images will be evaluated to remove the hood of 
 the car which does not appear in the GT.
+It also returns the GT flow with event_image masked.
 """
 def flow_error_dense(flow_gt, flow_pred, event_img, is_car=False):
     max_row = flow_gt.shape[1]
@@ -29,6 +30,12 @@ def flow_error_dense(flow_gt, flow_pred, event_img, is_car=False):
         np.linalg.norm(flow_gt_cropped, axis=2) > 0)
     total_mask = np.squeeze(np.logical_and(event_mask, flow_mask))
 
+    flow_gt_cropped_x = np.squeeze(flow_gt_cropped[:, :, 0])
+    flow_gt_cropped_y = np.squeeze(flow_gt_cropped[:, :, 1])
+    flow_gt_cropped_x = np.multiply(flow_gt_cropped_x, total_mask)
+    flow_gt_cropped_y = np.multiply(flow_gt_cropped_y, total_mask)
+    flow_gt_masked = np.dstack((flow_gt_cropped_x, flow_gt_cropped_y))
+
     gt_masked = flow_gt_cropped[total_mask, :]
     pred_masked = flow_pred_cropped[total_mask, :]
 
@@ -41,7 +48,7 @@ def flow_error_dense(flow_gt, flow_pred, event_img, is_car=False):
     thresh = 3.
     percent_AEE = float((EE < thresh).sum()) / float(EE.shape[0] + 1e-5)
 
-    return AEE, percent_AEE, n_points
+    return AEE, percent_AEE, n_points, flow_gt_masked
 
 """
 Propagates x_indices and y_indices by their flow, as defined in x_flow, y_flow.
