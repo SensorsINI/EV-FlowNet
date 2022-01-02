@@ -5,9 +5,9 @@ import math
 import cv2
 
 """
-Calculates per pixel flow error between flow_pred and flow_gt. 
+Calculates per pixel flow error between flow_pred and flow_gt.
 event_img is used to mask out any pixels without events (are 0).
-If is_car is True, only the top 190 rows of the images will be evaluated to remove the hood of 
+If is_car is True, only the top 190 rows of the images will be evaluated to remove the hood of
 the car which does not appear in the GT.
 It also returns the GT flow with event_image masked.
 """
@@ -41,14 +41,25 @@ def flow_error_dense(flow_gt, flow_pred, event_img, is_car=False):
 
     # Average endpoint error.
     EE = np.linalg.norm(gt_masked - pred_masked, axis=-1)
+    GT_NORM = np.linalg.norm(gt_masked, axis=-1)
     n_points = EE.shape[0]
     AEE = np.mean(EE)
+    RAEE = np.mean(EE/GT_NORM) * 100
+
+    # Average angular error.
+    unit_vectors_pred = pred_masked/np.linalg.norm(pred_masked, axis=-1)[:, None]
+    unit_vectors_gt = gt_masked / np.linalg.norm(gt_masked, axis=-1)[:, None]
+    dot_product_vector = np.sum(unit_vectors_pred * unit_vectors_gt, axis=1)
+    dot_product_vector[np.where(dot_product_vector > 1)] = 1
+    dot_product_vector[np.where(dot_product_vector < -1)] = -1
+    AE = np.arccos(dot_product_vector)
+    AAE = np.mean(AE) * 180/np.pi  # Obtain mean value and convert it from rad to degree
 
     # Percentage of points with EE < 3 pixels.
     thresh = 3.
     percent_AEE = float((EE < thresh).sum()) / float(EE.shape[0] + 1e-5)
 
-    return AEE, percent_AEE, n_points, flow_gt_masked
+    return AEE, RAEE, AAE, percent_AEE, n_points, flow_gt_masked
 
 """
 Propagates x_indices and y_indices by their flow, as defined in x_flow, y_flow.
@@ -60,7 +71,7 @@ def prop_flow(x_flow, y_flow, x_indices, y_indices, x_mask, y_mask, scale_factor
                               x_indices,
                               y_indices,
                               cv2.INTER_NEAREST)
-    
+
     flow_y_interp = cv2.remap(y_flow,
                               x_indices,
                               y_indices,
@@ -68,7 +79,7 @@ def prop_flow(x_flow, y_flow, x_indices, y_indices, x_mask, y_mask, scale_factor
 
     x_mask[flow_x_interp == 0] = False
     y_mask[flow_y_interp == 0] = False
-        
+
     x_indices += flow_x_interp * scale_factor
     y_indices += flow_y_interp * scale_factor
 
@@ -112,7 +123,7 @@ def estimate_corresponding_gt_flow(x_flow_in,
     y_flow = np.squeeze(y_flow_in[gt_iter, ...])
 
     dt = end_time - start_time
-    
+
     # No need to propagate if the desired dt is shorter than the time between gt timestamps.
     if gt_dt > dt:
         return x_flow * dt / gt_dt, y_flow * dt / gt_dt
@@ -147,27 +158,27 @@ def estimate_corresponding_gt_flow(x_flow_in,
                   x_indices, y_indices,
                   x_mask, y_mask)
         total_dt += gt_timestamps[gt_iter+1] - gt_timestamps[gt_iter]
-        
+
         gt_iter += 1
 
     final_dt = end_time - gt_timestamps[gt_iter]
     total_dt += final_dt
 
     final_gt_dt = gt_timestamps[gt_iter+1] - gt_timestamps[gt_iter]
-    
+
     x_flow = np.squeeze(x_flow_in[gt_iter, ...])
     y_flow = np.squeeze(y_flow_in[gt_iter, ...])
 
     scale_factor = final_dt / final_gt_dt
-    
+
     prop_flow(x_flow, y_flow,
               x_indices, y_indices,
               x_mask, y_mask,
               scale_factor)
-    
+
     x_shift = x_indices - orig_x_indices
     y_shift = y_indices - orig_y_indices
     x_shift[~x_mask] = 0
     y_shift[~y_mask] = 0
-    
+
     return x_shift, y_shift
