@@ -71,6 +71,8 @@ def configs():
     parser.add_argument('--save_test_output',
                         action='store_true',
                         help='If true, output flow will be saved to a npz file.')
-
+    parser.add_argument('--save_output_npz_for_jaer',
+                        action='store_true',
+                        help='If true, output flow will be saved to a npz file that is supported by jaer.')
     args = parser.parse_args()
     return args

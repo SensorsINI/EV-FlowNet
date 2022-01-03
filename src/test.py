@@ -76,6 +76,11 @@ def test(sess,
         gt_flow_list = []
         event_image_list = []
 
+    if args.save_output_npz_for_jaer:
+        x_output_flow_list = []
+        y_output_flow_list = []
+        timestamp_list = []
+
     while not coord.should_stop():
         start_time = time.time()
         try:
@@ -117,6 +122,13 @@ def test(sess,
 
             if args.save_test_output:
                 gt_flow_list.append(gt_flow)
+
+            if args.save_output_npz_for_jaer:
+                x_pred_flow = pred_flow[38:218, 10:250, 0]
+                y_pred_flow = pred_flow[38:218, 10:250, 1]
+                x_output_flow_list.append(np.float64(-x_pred_flow))
+                y_output_flow_list.append(np.float64(y_pred_flow))
+                timestamp_list.append(image_timestamps[0][0])
 
             image_size = pred_flow.shape
             full_size = gt_flow.shape
@@ -223,6 +235,12 @@ def test(sess,
             np.savez('{}_output.npz'.format(args.test_sequence),
                      output_flows=np.stack(output_flow_list, axis=0),
                      event_images=np.stack(event_image_list, axis=0))
+    if args.save_output_npz_for_jaer:
+        print('Saving data to {}_test_output_for_jaer.npz'.format(args.test_sequence))
+        np.savez('{}_est_output_for_jaer.npz'.format(args.test_sequence),
+                 x_flow_dist=np.stack(x_output_flow_list, axis=0),
+                 y_flow_dist=np.stack(y_output_flow_list, axis=0),
+                 timestamps=np.stack(timestamp_list, axis=0))
 
     coord.request_stop()
 
