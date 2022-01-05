@@ -52,7 +52,7 @@ last_pos = 0
 dispXArray = np.empty((0, 260, 346), float)
 dispYArray = np.empty((0, 260, 346), float)
 for pos in position:
-    xDisp = -(pos - last_pos) / depth * K[0]
+    xDisp = (pos - last_pos) / depth * K[0]
     yDisp = 0
     dispXArray = np.append(dispXArray, np.full((1, 260, 346), xDisp), axis=0)
     dispYArray = np.append(dispYArray, np.full((1, 260, 346), yDisp), axis=0)
