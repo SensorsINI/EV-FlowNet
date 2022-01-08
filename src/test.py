@@ -237,7 +237,7 @@ def test(sess,
                      event_images=np.stack(event_image_list, axis=0))
     if args.save_output_npz_for_jaer:
         print('Saving data to {}_test_output_for_jaer.npz'.format(args.test_sequence))
-        np.savez('{}_est_output_for_jaer.npz'.format(args.test_sequence),
+        np.savez('{}_test_output_for_jaer.npz'.format(args.test_sequence),
                  x_flow_dist=np.stack(x_output_flow_list, axis=0),
                  y_flow_dist=np.stack(y_output_flow_list, axis=0),
                  timestamps=np.stack(timestamp_list, axis=0))
