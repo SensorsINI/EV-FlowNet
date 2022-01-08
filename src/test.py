@@ -146,6 +146,7 @@ def test(sess,
                                                           pred_flow,
                                                           event_count_image,
                                                           'outdoor' in args.test_sequence)
+            AEE = AEE / (image_timestamps[0][1] - image_timestamps[0][0])   # Convert AEE from px/frame to px/s
             AEE_list.append(AEE)
             RAEE_list.append(RAEE)
             AAE_list.append(AAE)
@@ -162,7 +163,7 @@ def test(sess,
                   .format(iters, image_timestamps[0][0], network_duration,
                           max_flow_sum / iters, min_flow_sum / iters))
             if args.gt_path:
-                print(u'Mean AEE: {:.2f}, mean RAEE: {:.2f}%, mean AAE:{:.2f}\N{DEGREE SIGN}, mean %AEE: {:.2f}, # pts: {:.2f}'
+                print(u'Mean AEE: {:.2f}px/s, mean RAEE: {:.2f}%, mean AAE:{:.2f}\N{DEGREE SIGN}, mean %AEE: {:.2f}, # pts: {:.2f}'
                       .format(AEE_sum / iters,
                               RAEE_sum / iters,
                               AAE_sum / iters,
@@ -217,7 +218,7 @@ def test(sess,
 
     print('Testing done. ')
     if args.gt_path:
-        print(u'mean AEE: {:.2f}, mean RAEE: {:.2f}%, mean AAE:{:.2f}\N{DEGREE SIGN},  mean %AEE: {:.2f}'
+        print(u'mean AEE: {:.2f}px/s, mean RAEE: {:.2f}%, mean AAE:{:.2f}\N{DEGREE SIGN},  mean %AEE: {:.2f}'
               .format(AEE_sum / iters,
                       RAEE_sum / iters,
                       AAE_sum / iters,
