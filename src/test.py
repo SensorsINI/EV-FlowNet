@@ -124,9 +124,17 @@ def test(sess,
                 gt_flow_list.append(gt_flow)
 
             if args.save_output_npz_for_jaer:
-                x_pred_flow = pred_flow[38:218, 10:250, 0]
-                y_pred_flow = pred_flow[38:218, 10:250, 1]
-                x_output_flow_list.append(np.float64(-x_pred_flow))
+                x_pred_flow = pred_flow[:, :, 0]
+                y_pred_flow = pred_flow[:, :, 1]
+                x_output_flow_list.append(np.float64(x_pred_flow))
+                """
+                Uncomment these three lines only for slider_hdr_far sequence.
+                The output is cropped and x flipped 180x240 flow image.
+                Usually it outputs normal 256x256 flow image.
+                """
+                # x_pred_flow = pred_flow[38:218, 10:250, 0]
+                # y_pred_flow = pred_flow[38:218, 10:250, 1]
+                # x_output_flow_list.append(np.float64(-x_pred_flow))
                 y_output_flow_list.append(np.float64(y_pred_flow))
                 timestamp_list.append(image_timestamps[0][0])
 
