@@ -112,6 +112,21 @@ def test(sess,
             output_flow_list.append(pred_flow)
             event_image_list.append(event_count_image)
 
+        if args.save_output_npz_for_jaer:
+            x_pred_flow = pred_flow[:, :, 0]
+            y_pred_flow = pred_flow[:, :, 1]
+            x_output_flow_list.append(np.float64(x_pred_flow))
+            """
+            Uncomment these three lines only for slider_hdr_far sequence.
+            The output is a cropped and x flipped 180x240 flow image.
+            By default it outputs a 256x256 flow image.
+            """
+            # x_pred_flow = pred_flow[38:218, 10:250, 0]
+            # y_pred_flow = pred_flow[38:218, 10:250, 1]
+            # x_output_flow_list.append(np.float64(-x_pred_flow))
+            y_output_flow_list.append(np.float64(y_pred_flow))
+            timestamp_list.append(image_timestamps[0][0])
+
         if args.gt_path:
             U_gt, V_gt = estimate_corresponding_gt_flow(U_gt_all, V_gt_all,
                                                         gt_timestamps,
@@ -122,21 +137,6 @@ def test(sess,
 
             if args.save_test_output:
                 gt_flow_list.append(gt_flow)
-
-            if args.save_output_npz_for_jaer:
-                x_pred_flow = pred_flow[:, :, 0]
-                y_pred_flow = pred_flow[:, :, 1]
-                x_output_flow_list.append(np.float64(x_pred_flow))
-                """
-                Uncomment these three lines only for slider_hdr_far sequence.
-                The output is cropped and x flipped 180x240 flow image.
-                Usually it outputs normal 256x256 flow image.
-                """
-                # x_pred_flow = pred_flow[38:218, 10:250, 0]
-                # y_pred_flow = pred_flow[38:218, 10:250, 1]
-                # x_output_flow_list.append(np.float64(-x_pred_flow))
-                y_output_flow_list.append(np.float64(y_pred_flow))
-                timestamp_list.append(image_timestamps[0][0])
 
             image_size = pred_flow.shape
             full_size = gt_flow.shape
